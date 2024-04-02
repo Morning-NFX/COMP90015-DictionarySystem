@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.Socket;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class DictionaryClient {
     // GUI Components
@@ -44,7 +45,7 @@ public class DictionaryClient {
             System.exit(1);
         }
 
-        // start program GUI
+        // start program
         new DictionaryClient().init();
     }
 
@@ -150,7 +151,9 @@ public class DictionaryClient {
                     JOptionPane.showMessageDialog(addDialog, "Please enter the word and corresponding meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
                     // TODO: Add the word and its meaning to your dictionary
-                    this.sendToServer("add", newWord, newMeaning);
+                    sendToServer("add", newWord, newMeaning);
+                    receiveFromServer();
+
                     addDialog.dispose();
                 }
 
@@ -173,6 +176,7 @@ public class DictionaryClient {
             addDialog.setVisible(true);
         });
 
+        // remove an existing word
         removeBtn.addActionListener(e -> {
             JDialog addDialog = new JDialog(frame, "Remove Word", true);
             addDialog.setSize(400, 300);
@@ -214,6 +218,7 @@ public class DictionaryClient {
             addDialog.setVisible(true);
         });
 
+        // update an existing word
         updateBtn.addActionListener(e -> {
             JDialog addDialog = new JDialog(frame, "Remove Word", true);
             addDialog.setSize(400, 300);
@@ -261,6 +266,12 @@ public class DictionaryClient {
         });
     }
 
+    /**
+     * Send the request to Server
+     * @param mode operation type [search/add/remove/update]
+     * @param word word
+     * @param meaning meaning of the word
+     */
     private void sendToServer(String mode, String word, String meaning){
         // create json object and content
         JSONObject requestObj = new JSONObject();
@@ -277,6 +288,30 @@ public class DictionaryClient {
             System.exit(1);
         }
     }
+
+    private void receiveFromServer(){
+        try {
+            // Create BufferedReader to read the input stream from the server
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // Read the server's response
+            String serverResponse = in.readLine();
+
+            // Parse the server's response into a JSONObject
+            JSONParser parser = new JSONParser();
+            JSONObject responseObj = (JSONObject) parser.parse(serverResponse);
+
+            // TODO: Process the JSONObject as needed
+            System.out.println(responseObj.toJSONString());
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error when trying to read from server!", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        } catch (org.json.simple.parser.ParseException e) {
+            JOptionPane.showMessageDialog(frame, "Error when trying to parse server response!", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+    }
+}
 }
 
 // TODO: 在client尝试与server交互式，发现server不在了。进行提示并关闭程序
