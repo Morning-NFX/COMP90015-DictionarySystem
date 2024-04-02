@@ -4,13 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import org.json.simple.JSONObject;
 
 public class DictionaryClient {
     // GUI Components
 
-    JFrame frame = new JFrame("Dictionary System [Client]");
+    JFrame frame = new JFrame("Client");
 
     Panel searchPanel = new Panel();
     JTextField searchKeyWord = new JTextField();
@@ -58,6 +59,7 @@ public class DictionaryClient {
 
         try {
             socket = new Socket(serverAddress, serverPort);
+            frame.setTitle("Client [" + socket.getLocalSocketAddress() + "]");
         } catch (IOException e) {
             JOptionPane.showMessageDialog(frame, "Error when trying to connect with server!", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
@@ -96,6 +98,9 @@ public class DictionaryClient {
         frame.add(actionPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * When user click the close button
+     */
     private void addWindowCloseListener() {
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -138,14 +143,14 @@ public class DictionaryClient {
             executeBtn.addActionListener(ev -> {
                 // Perform add operation
                 // Get the word and its meaning from the text fields
-                String word = wordField.getText();
-                String meaning = meaningField.getText();
+                String newWord = wordField.getText();
+                String newMeaning = meaningField.getText();
 
-                if (word.isEmpty() || meaning.isEmpty()) {
+                if (newWord.isEmpty() || newMeaning.isEmpty()) {
                     JOptionPane.showMessageDialog(addDialog, "Please enter the word and corresponding meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
                     // TODO: Add the word and its meaning to your dictionary
-
+                    this.sendToServer("add", newWord, newMeaning);
                     addDialog.dispose();
                 }
 
@@ -254,6 +259,23 @@ public class DictionaryClient {
             addDialog.add(cancelBtn);
             addDialog.setVisible(true);
         });
+    }
+
+    private void sendToServer(String mode, String word, String meaning){
+        // create json object and content
+        JSONObject requestObj = new JSONObject();
+        requestObj.put("mode", mode);
+        requestObj.put("word", word);
+        requestObj.put("meaning", meaning);
+
+        // send json request to server
+        try {
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            out.println(requestObj.toJSONString());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error when trying to connect with server!", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
     }
 }
 
