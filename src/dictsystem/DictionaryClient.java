@@ -1,8 +1,9 @@
 package dictsystem;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -12,7 +13,7 @@ public class DictionaryClient {
     JFrame frame = new JFrame("Dictionary System [Client]");
 
     Panel searchPanel = new Panel();
-    JTextField searchKeyWord = new JTextField("Type to start...");
+    JTextField searchKeyWord = new JTextField();
     JButton searchBtn = new JButton("Search");
 
     JTextArea searchResult = new JTextArea();
@@ -47,7 +48,6 @@ public class DictionaryClient {
     }
 
     private void init() {
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   //TODO: modify to close Socket connection
         frame.setSize(610, 550);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -62,6 +62,11 @@ public class DictionaryClient {
             JOptionPane.showMessageDialog(frame, "Error when trying to connect with server!", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
+
+        addActionListeners();
+
+        // close btn to terminate socket and program
+        addWindowCloseListener();
     }
 
     private void setComponentsStyle() {
@@ -90,4 +95,166 @@ public class DictionaryClient {
         actionPanel.add(updateBtn);
         frame.add(actionPanel, BorderLayout.SOUTH);
     }
+
+    private void addWindowCloseListener() {
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                try {
+                    if (socket != null && !socket.isClosed()) {
+                        socket.close();
+                    }
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
+    }
+
+    private void addActionListeners() {
+        searchBtn.addActionListener(e -> {
+            // Perform search operation
+        });
+
+        // add a new word
+        addBtn.addActionListener(e -> {
+            JDialog addDialog = new JDialog(frame, "Add Word", true);
+            addDialog.setSize(400, 300);
+            addDialog.setLocationRelativeTo(frame);
+
+            JTextField wordField = new JTextField();
+            wordField.setPreferredSize(new Dimension(200, 30));
+
+            JTextArea meaningField = new JTextArea();
+            meaningField.setLineWrap(true);
+            meaningField.setWrapStyleWord(true);
+            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
+            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
+
+            // add new word
+            JButton executeBtn = new JButton("Add");
+            executeBtn.addActionListener(ev -> {
+                // Perform add operation
+                // Get the word and its meaning from the text fields
+                String word = wordField.getText();
+                String meaning = meaningField.getText();
+
+                if (word.isEmpty() || meaning.isEmpty()) {
+                    JOptionPane.showMessageDialog(addDialog, "Please enter the word and corresponding meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    // TODO: Add the word and its meaning to your dictionary
+
+                    addDialog.dispose();
+                }
+
+
+            });
+
+            // close dialog
+            JButton cancelBtn = new JButton("Cancel");
+            cancelBtn.addActionListener(ev -> {
+                addDialog.dispose();
+            });
+
+            addDialog.setLayout(new GridLayout(3, 2));
+            addDialog.add(new JLabel("Word:"));
+            addDialog.add(wordField);
+            addDialog.add(new JLabel("Meaning:"));
+            addDialog.add(meaningScrollPane);
+            addDialog.add(executeBtn);
+            addDialog.add(cancelBtn);
+            addDialog.setVisible(true);
+        });
+
+        removeBtn.addActionListener(e -> {
+            JDialog addDialog = new JDialog(frame, "Remove Word", true);
+            addDialog.setSize(400, 300);
+            addDialog.setLocationRelativeTo(frame);
+
+            // TODO: get word and meaning
+            JTextField wordField = new JTextField();
+            wordField.setPreferredSize(new Dimension(200, 30));
+            wordField.setEditable(false);
+
+            JTextArea meaningField = new JTextArea();
+            meaningField.setLineWrap(true);
+            meaningField.setWrapStyleWord(true);
+            meaningField.setEditable(false);
+            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
+            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
+
+            //add new word
+            JButton executeBtn = new JButton("Remove");
+            executeBtn.addActionListener(ev -> {
+                // Perform delete operation
+
+                addDialog.dispose();
+            });
+
+            //close dialog
+            JButton cancelBtn = new JButton("Cancel");
+            cancelBtn.addActionListener(ev -> {
+                addDialog.dispose();
+            });
+
+            addDialog.setLayout(new GridLayout(3, 2));
+            addDialog.add(new JLabel("Word:"));
+            addDialog.add(wordField);
+            addDialog.add(new JLabel("Meaning:"));
+            addDialog.add(meaningScrollPane);
+            addDialog.add(executeBtn);
+            addDialog.add(cancelBtn);
+            addDialog.setVisible(true);
+        });
+
+        updateBtn.addActionListener(e -> {
+            JDialog addDialog = new JDialog(frame, "Remove Word", true);
+            addDialog.setSize(400, 300);
+            addDialog.setLocationRelativeTo(frame);
+
+            // TODO: get word
+            JTextField wordField = new JTextField();
+            wordField.setPreferredSize(new Dimension(200, 30));
+            wordField.setEditable(false);
+
+            JTextArea meaningField = new JTextArea();
+            meaningField.setLineWrap(true);
+            meaningField.setWrapStyleWord(true);
+            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
+            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
+
+            //add new word
+            JButton executeBtn = new JButton("Update");
+            executeBtn.addActionListener(ev -> {
+                // Perform delete operation
+                String meaning = meaningField.getText();
+
+                if (meaning.isEmpty()) {
+                    JOptionPane.showMessageDialog(addDialog, "Please enter new meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
+                } else {
+
+                    addDialog.dispose();
+                }
+            });
+
+            //close dialog
+            JButton cancelBtn = new JButton("Cancel");
+            cancelBtn.addActionListener(ev -> {
+                addDialog.dispose();
+            });
+
+            addDialog.setLayout(new GridLayout(3, 2));
+            addDialog.add(new JLabel("Word:"));
+            addDialog.add(wordField);
+            addDialog.add(new JLabel("Meaning:"));
+            addDialog.add(meaningScrollPane);
+            addDialog.add(executeBtn);
+            addDialog.add(cancelBtn);
+            addDialog.setVisible(true);
+        });
+    }
 }
+
+// TODO: 在client尝试与server交互式，发现server不在了。进行提示并关闭程序
