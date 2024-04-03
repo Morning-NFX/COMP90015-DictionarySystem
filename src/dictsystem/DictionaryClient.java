@@ -28,7 +28,6 @@ public class DictionaryClient {
     // Socket variables
     private static String serverAddress;
     private static int serverPort;
-
     private static Socket socket;
 
     public static void main(String[] args) {
@@ -119,6 +118,9 @@ public class DictionaryClient {
         });
     }
 
+    /**
+     * When user click on buttons
+     */
     private void addActionListeners() {
         searchBtn.addActionListener(e -> {
             // Perform search operation
@@ -135,37 +137,35 @@ public class DictionaryClient {
 
             JTextArea meaningField = new JTextArea();
             meaningField.setLineWrap(true);
-            meaningField.setWrapStyleWord(true);
             JScrollPane meaningScrollPane = new JScrollPane(meaningField);
             meaningScrollPane.setPreferredSize(new Dimension(250, 60));
 
-            // add new word
+            // execute Btn -> add new word
             JButton executeBtn = new JButton("Add");
             executeBtn.addActionListener(ev -> {
-                // Perform add operation
-                // Get the word and its meaning from the text fields
                 String newWord = wordField.getText();
                 String newMeaning = meaningField.getText();
 
+                // check word and meaning not empty
                 if (newWord.isEmpty() || newMeaning.isEmpty()) {
                     JOptionPane.showMessageDialog(addDialog, "Please enter the word and corresponding meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    // TODO: Add the word and its meaning to your dictionary
                     sendToServer("add", newWord, newMeaning);
-                    receiveFromServer();
-
+                    JSONObject resposneObj = receiveFromServer();
+                    if (resposneObj.get("status").equals("success")) {
+                        JOptionPane.showMessageDialog(addDialog, "Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(addDialog, "Word already exist!", "Failed", JOptionPane.INFORMATION_MESSAGE);
+                    }
                     addDialog.dispose();
                 }
-
-
             });
 
-            // close dialog
+            // Cancel Btn -> close dialog
             JButton cancelBtn = new JButton("Cancel");
             cancelBtn.addActionListener(ev -> {
                 addDialog.dispose();
             });
-
             addDialog.setLayout(new GridLayout(3, 2));
             addDialog.add(new JLabel("Word:"));
             addDialog.add(wordField);
@@ -182,17 +182,8 @@ public class DictionaryClient {
             addDialog.setSize(400, 300);
             addDialog.setLocationRelativeTo(frame);
 
-            // TODO: get word and meaning
-            JTextField wordField = new JTextField();
+            JTextField wordField = new JTextField(searchKeyWord.getText());
             wordField.setPreferredSize(new Dimension(200, 30));
-            wordField.setEditable(false);
-
-            JTextArea meaningField = new JTextArea();
-            meaningField.setLineWrap(true);
-            meaningField.setWrapStyleWord(true);
-            meaningField.setEditable(false);
-            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
-            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
 
             //add new word
             JButton executeBtn = new JButton("Remove");
@@ -208,11 +199,9 @@ public class DictionaryClient {
                 addDialog.dispose();
             });
 
-            addDialog.setLayout(new GridLayout(3, 2));
+            addDialog.setLayout(new GridLayout(2, 2));
             addDialog.add(new JLabel("Word:"));
             addDialog.add(wordField);
-            addDialog.add(new JLabel("Meaning:"));
-            addDialog.add(meaningScrollPane);
             addDialog.add(executeBtn);
             addDialog.add(cancelBtn);
             addDialog.setVisible(true);
@@ -224,14 +213,11 @@ public class DictionaryClient {
             addDialog.setSize(400, 300);
             addDialog.setLocationRelativeTo(frame);
 
-            // TODO: get word
             JTextField wordField = new JTextField();
             wordField.setPreferredSize(new Dimension(200, 30));
-            wordField.setEditable(false);
 
             JTextArea meaningField = new JTextArea();
             meaningField.setLineWrap(true);
-            meaningField.setWrapStyleWord(true);
             JScrollPane meaningScrollPane = new JScrollPane(meaningField);
             meaningScrollPane.setPreferredSize(new Dimension(250, 60));
 
@@ -258,7 +244,7 @@ public class DictionaryClient {
             addDialog.setLayout(new GridLayout(3, 2));
             addDialog.add(new JLabel("Word:"));
             addDialog.add(wordField);
-            addDialog.add(new JLabel("Meaning:"));
+            addDialog.add(new JLabel("New Meaning:"));
             addDialog.add(meaningScrollPane);
             addDialog.add(executeBtn);
             addDialog.add(cancelBtn);
@@ -289,29 +275,24 @@ public class DictionaryClient {
         }
     }
 
-    private void receiveFromServer(){
+    private JSONObject receiveFromServer(){
         try {
             // Create BufferedReader to read the input stream from the server
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Read the server's response
-            String serverResponse = in.readLine();
-
-            // Parse the server's response into a JSONObject
+            // read response from server
             JSONParser parser = new JSONParser();
-            JSONObject responseObj = (JSONObject) parser.parse(serverResponse);
-
-            // TODO: Process the JSONObject as needed
-            System.out.println(responseObj.toJSONString());
-
+            JSONObject responseObj = (JSONObject) parser.parse(in.readLine());
+            return responseObj;
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Error when trying to read from server!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Error when trying to connect with server!", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         } catch (org.json.simple.parser.ParseException e) {
             JOptionPane.showMessageDialog(frame, "Error when trying to parse server response!", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
+        }
+        return null;
     }
-}
 }
 
 // TODO: 在client尝试与server交互式，发现server不在了。进行提示并关闭程序
