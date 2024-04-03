@@ -30,7 +30,7 @@ public class DictionaryServer {
     private Connection dbConnection;
     private HashMap<String, String> dictionary = new HashMap<>();
     LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HH:mm:ss");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("(yyyyMMdd-HH:mm:ss)");
 
     public static void main(String[] args) {
         // check parameters
