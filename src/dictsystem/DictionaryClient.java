@@ -122,15 +122,18 @@ public class DictionaryClient {
      * When user click on buttons
      */
     private void addActionListeners() {
+        // search meaning
         searchBtn.addActionListener(e -> {
             String word = searchKeyWord.getText();
             sendToServer("search", word, "");
             JSONObject responseObj = receiveFromServer();
             if (responseObj.get("status").equals("success")) {
                 searchResult.setText((String) responseObj.get("meaning"));
-            } else if (responseObj.get("status").equals("failed")) {
+            } else if (responseObj.get("status").equals("fail")) {
+                searchResult.setText("");
                 JOptionPane.showMessageDialog(frame, responseObj.get("message"), "Fail", JOptionPane.WARNING_MESSAGE);
             } else {
+                searchResult.setText("");
                 JOptionPane.showMessageDialog(frame, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
@@ -142,32 +145,26 @@ public class DictionaryClient {
             addDialog.setLocationRelativeTo(frame);
 
             JTextField wordField = new JTextField();
-            wordField.setPreferredSize(new Dimension(200, 30));
+            wordField.setPreferredSize(new Dimension(200, 20));
 
-            JTextArea meaningField = new JTextArea();
-            meaningField.setLineWrap(true);
-            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
-            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
+            JTextField meaningField = new JTextField();
+            meaningField.setPreferredSize(new Dimension(200, 20));
 
             // execute Btn -> add new word
             JButton executeBtn = new JButton("Add");
             executeBtn.addActionListener(ev -> {
                 String newWord = wordField.getText();
                 String newMeaning = meaningField.getText();
-
-                // check word and meaning not empty
-                if (newWord.isEmpty() || newMeaning.isEmpty()) {
-                    JOptionPane.showMessageDialog(addDialog, "Please enter the word and corresponding meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
+                sendToServer("add", newWord, newMeaning);
+                JSONObject responseObj = receiveFromServer();
+                if (responseObj.get("status").equals("success")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else if (responseObj.get("status").equals("fail")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Fail", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    sendToServer("add", newWord, newMeaning);
-                    JSONObject resposneObj = receiveFromServer();
-                    if (resposneObj.get("status").equals("success")) {
-                        JOptionPane.showMessageDialog(addDialog, "Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(addDialog, "Word already exist!", "Failed", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                    addDialog.dispose();
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                addDialog.dispose();
             });
 
             // Cancel Btn -> close dialog
@@ -179,7 +176,7 @@ public class DictionaryClient {
             addDialog.add(new JLabel("Word:"));
             addDialog.add(wordField);
             addDialog.add(new JLabel("Meaning:"));
-            addDialog.add(meaningScrollPane);
+            addDialog.add(meaningField);
             addDialog.add(executeBtn);
             addDialog.add(cancelBtn);
             addDialog.setVisible(true);
@@ -191,18 +188,26 @@ public class DictionaryClient {
             addDialog.setSize(400, 300);
             addDialog.setLocationRelativeTo(frame);
 
-            JTextField wordField = new JTextField(searchKeyWord.getText());
+            JTextField wordField = new JTextField();
             wordField.setPreferredSize(new Dimension(200, 30));
 
-            //add new word
+            // execute Btn -> remove word
             JButton executeBtn = new JButton("Remove");
             executeBtn.addActionListener(ev -> {
-                // Perform delete operation
-
+                String word = wordField.getText();
+                sendToServer("remove", word, null);
+                JSONObject responseObj = receiveFromServer();
+                if (responseObj.get("status").equals("success")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else if (responseObj.get("status").equals("fail")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Fail", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
+                }
                 addDialog.dispose();
             });
 
-            //close dialog
+            // cancel Btn -> close dialog
             JButton cancelBtn = new JButton("Cancel");
             cancelBtn.addActionListener(ev -> {
                 addDialog.dispose();
@@ -225,26 +230,26 @@ public class DictionaryClient {
             JTextField wordField = new JTextField();
             wordField.setPreferredSize(new Dimension(200, 30));
 
-            JTextArea meaningField = new JTextArea();
-            meaningField.setLineWrap(true);
-            JScrollPane meaningScrollPane = new JScrollPane(meaningField);
-            meaningScrollPane.setPreferredSize(new Dimension(250, 60));
+            JTextField meaningField = new JTextField();
+            meaningField.setPreferredSize(new Dimension(200, 30));
 
-            //add new word
+            // execute Btn -> update word
             JButton executeBtn = new JButton("Update");
             executeBtn.addActionListener(ev -> {
-                // Perform delete operation
+                String word = wordField.getText();
                 String meaning = meaningField.getText();
-
-                if (meaning.isEmpty()) {
-                    JOptionPane.showMessageDialog(addDialog, "Please enter new meaning!", "Warning", JOptionPane.WARNING_MESSAGE);
+                sendToServer("update", word, meaning);
+                JSONObject responseObj = receiveFromServer();
+                if (responseObj.get("status").equals("success")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else if (responseObj.get("status").equals("fail")) {
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Fail", JOptionPane.WARNING_MESSAGE);
                 } else {
-
-                    addDialog.dispose();
+                    JOptionPane.showMessageDialog(addDialog, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
 
-            //close dialog
+            // cancel Btn -> close dialog
             JButton cancelBtn = new JButton("Cancel");
             cancelBtn.addActionListener(ev -> {
                 addDialog.dispose();
@@ -254,7 +259,7 @@ public class DictionaryClient {
             addDialog.add(new JLabel("Word:"));
             addDialog.add(wordField);
             addDialog.add(new JLabel("New Meaning:"));
-            addDialog.add(meaningScrollPane);
+            addDialog.add(meaningField);
             addDialog.add(executeBtn);
             addDialog.add(cancelBtn);
             addDialog.setVisible(true);
@@ -273,7 +278,6 @@ public class DictionaryClient {
         requestObj.put("mode", mode);
         requestObj.put("word", word);
         requestObj.put("meaning", meaning);
-
         // send json request to server
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -284,11 +288,14 @@ public class DictionaryClient {
         }
     }
 
+    /**
+     * Receive response from server
+     * @return response JSONObject
+     */
     private JSONObject receiveFromServer(){
         try {
             // Create BufferedReader to read the input stream from the server
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
             // read response from server
             JSONParser parser = new JSONParser();
             JSONObject responseObj = (JSONObject) parser.parse(in.readLine());
