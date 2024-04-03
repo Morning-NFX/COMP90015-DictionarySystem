@@ -3,15 +3,11 @@ package dictsystem;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class DictionaryServer {
@@ -61,8 +57,10 @@ public class DictionaryServer {
         while (true) {
             Socket socket = serverSocket.accept();
 
+            String socketInfo = socket.getInetAddress() + ":" + socket.getPort();
+
             // new connection
-            System.out.println("New connection from: " + socket.getInetAddress() + ":" + socket.getPort());
+            System.out.println("New connection from: " + socketInfo);
 
             // handle each client connection in a separate thread
             new Thread(() -> {
@@ -73,12 +71,8 @@ public class DictionaryServer {
                         //read request from client
                         JSONParser parser = new JSONParser();
                         JSONObject requestObj = (JSONObject) parser.parse(in.readLine());
-                        System.out.println(requestObj.toJSONString());
 
-//                        JSONObject responseObj = clientRequestProcess(requestObj);
-                        JSONObject responseObj = new JSONObject();
-                        responseObj.put("word", "a");
-                        responseObj.put("meaning", "b");
+                        JSONObject responseObj =handleClientRequest(requestObj, socketInfo);
 
                         // send responseObj back to client
                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -109,7 +103,7 @@ public class DictionaryServer {
         }
     }
 
-    private void clientRequestProcess(JSONObject requestObj, Socket socket){
+    private JSONObject handleClientRequest(JSONObject requestObj, String socketInfo){
         String mode = (String) requestObj.get("mode");
         String word = (String) requestObj.get("word");
         String meaning = (String) requestObj.get("meaning");
@@ -118,14 +112,46 @@ public class DictionaryServer {
         if (mode.equals("search")) {
 
         }   // add new word
-        else if (mode.equals("add")) {
-
+        else if (mode.equals("add")) {;
+            System.out.println(socketInfo + " is trying to add word: " + word + " with meaning: " + meaning);
+            return addWord(word, meaning);
         }   //  remove an existing word
         else if (mode.equals("remove")) {
 
         }   // update an existing word
         else if (mode.equals("update")) {
 
+        }
+        // invalid operation
+        JSONObject responseObj = new JSONObject();
+        responseObj.put("status", "failed");
+        responseObj.put("message", "Invalid operation!");
+        return responseObj;
+    }
+
+    /**
+     * Add a new word to the dictionary (lock)
+     * @param word new word
+     * @param meaning meaning of the word
+     * @return response JSON object
+     */
+    private synchronized JSONObject addWord(String word, String meaning) {
+        JSONObject responseObj = new JSONObject();
+        try {
+            String sql = "INSERT INTO dictionary (word, meaning) VALUES (?, ?)";
+            PreparedStatement pstmt =dbConnection.prepareStatement(sql);
+            pstmt.setString(1, word);
+            pstmt.setString(2, meaning);
+            pstmt.executeUpdate();
+            pstmt.close();
+            // successfully add the word
+            responseObj.put("status", "success");
+            return responseObj;
+        } catch (SQLException e) {
+            // word already exists
+            responseObj.put("status", "failed");
+            responseObj.put("message", "Word already exists in dictionary!");
+            return responseObj;
         }
     }
 }
