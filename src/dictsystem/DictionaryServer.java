@@ -5,10 +5,7 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.*;
 import java.net.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DictionaryServer {
 
@@ -103,6 +100,12 @@ public class DictionaryServer {
         }
     }
 
+    /**
+     * Unit to process client request
+     * @param requestObj request JSON sent from client
+     * @param socketInfo client socket information (String)
+     * @return  response JSON object
+     */
     private JSONObject handleClientRequest(JSONObject requestObj, String socketInfo){
         String mode = (String) requestObj.get("mode");
         String word = (String) requestObj.get("word");
@@ -110,7 +113,8 @@ public class DictionaryServer {
 
         // search for word
         if (mode.equals("search")) {
-
+            System.out.println(socketInfo + " is trying to search word: " + word);
+            return searchWord(word);
         }   // add new word
         else if (mode.equals("add")) {;
             System.out.println(socketInfo + " is trying to add word: " + word + " with meaning: " + meaning);
@@ -127,6 +131,38 @@ public class DictionaryServer {
         responseObj.put("status", "failed");
         responseObj.put("message", "Invalid operation!");
         return responseObj;
+    }
+
+    /**
+     * Search the corresponding meaning based on give word
+     * @param word  word to search
+     * @return response JSON object
+     */
+    private JSONObject searchWord(String word) {
+        JSONObject responseObj = new JSONObject();
+        try {
+            String sql = "SELECT meaning FROM dictionary WHERE word = ?";
+            PreparedStatement pstmt = dbConnection.prepareStatement(sql);
+            pstmt.setString(1, word);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                // successfully find the word
+                String meaning = rs.getString("meaning");
+                responseObj.put("status", "success");
+                responseObj.put("meaning", meaning);
+            } else {
+                // word not found
+                responseObj.put("status", "failed");
+                responseObj.put("message", "Word not found in dictionary!");
+            }
+            pstmt.close();
+            return responseObj;
+        } catch (SQLException e) {
+            // database error
+            responseObj.put("status", "error");
+            responseObj.put("message", "Database error!");
+            return responseObj;
+        }
     }
 
     /**
