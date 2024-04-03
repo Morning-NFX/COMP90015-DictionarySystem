@@ -1,4 +1,4 @@
-package dictsystem;
+package dictsystem.client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -310,5 +310,3 @@ public class DictionaryClient {
         return null;
     }
 }
-
-// TODO: 在client尝试与server交互式，发现server不在了。进行提示并关闭程序

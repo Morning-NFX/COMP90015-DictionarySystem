@@ -1,4 +1,4 @@
-package dictsystem;
+package dictsystem.server;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -243,11 +243,6 @@ public class DictionaryServer {
      * @return response JSON object
      */
     private JSONObject addWord(String word, String meaning) {
-        try {
-            sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         JSONObject responseObj = new JSONObject();
         // check word and meaning not empty
         if (word.isEmpty() || meaning.isEmpty()) {
