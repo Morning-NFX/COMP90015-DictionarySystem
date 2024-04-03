@@ -87,9 +87,11 @@ public class DictionaryServer {
                 }
             }).start();
         }
-
     }
 
+    /**
+     * Connect to the dictionary database
+     */
     private void dbConnection(){
         try {
             String url = "jdbc:sqlite:" + dicFilePath;
@@ -101,7 +103,7 @@ public class DictionaryServer {
     }
 
     /**
-     * Unit to process client request
+     * process client request unit
      * @param requestObj request JSON sent from client
      * @param socketInfo client socket information (String)
      * @return  response JSON object
@@ -140,6 +142,13 @@ public class DictionaryServer {
      */
     private JSONObject searchWord(String word) {
         JSONObject responseObj = new JSONObject();
+        // check word not empty
+        if (word.isEmpty()) {
+            responseObj.put("status", "error");
+            responseObj.put("message", "Please enter the word!");
+            return responseObj;
+        }
+        // search word in db
         try {
             String sql = "SELECT meaning FROM dictionary WHERE word = ?";
             PreparedStatement pstmt = dbConnection.prepareStatement(sql);
@@ -184,10 +193,18 @@ public class DictionaryServer {
             responseObj.put("status", "success");
             return responseObj;
         } catch (SQLException e) {
-            // word already exists
-            responseObj.put("status", "failed");
-            responseObj.put("message", "Word already exists in dictionary!");
-            return responseObj;
+            if (e.getSQLState().equals("23000")) {
+                // word already exists
+                responseObj.put("status", "failed");
+                responseObj.put("message", "Word already exists in dictionary!");
+                return responseObj;
+            } else {
+                // database error
+                e.printStackTrace();
+                responseObj.put("status", "error");
+                responseObj.put("message", "Database error!");
+                return responseObj;
+            }
         }
     }
 }

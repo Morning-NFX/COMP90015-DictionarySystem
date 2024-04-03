@@ -124,19 +124,14 @@ public class DictionaryClient {
     private void addActionListeners() {
         searchBtn.addActionListener(e -> {
             String word = searchKeyWord.getText();
-            // check if the word is empty
-            if (word.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "Please enter the word to search!", "Warning", JOptionPane.WARNING_MESSAGE);
+            sendToServer("search", word, "");
+            JSONObject responseObj = receiveFromServer();
+            if (responseObj.get("status").equals("success")) {
+                searchResult.setText((String) responseObj.get("meaning"));
+            } else if (responseObj.get("status").equals("failed")) {
+                JOptionPane.showMessageDialog(frame, responseObj.get("message"), "Fail", JOptionPane.WARNING_MESSAGE);
             } else {
-                sendToServer("search", word, "");
-                JSONObject responseObj = receiveFromServer();
-                if (responseObj.get("status").equals("success")) {
-                    searchResult.setText((String) responseObj.get("meaning"));
-                } else if (responseObj.get("status").equals("failed")) {
-                    searchResult.setText((String) responseObj.get("message"));
-                } else {
-                    JOptionPane.showMessageDialog(frame, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                JOptionPane.showMessageDialog(frame, responseObj.get("message"), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
