@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class DictionaryServer {
 
     JFrame frame = new JFrame("Server");
-    JTextPane messageCenter = new JTextPane();
+    JTextPane  messageCenter = new JTextPane ();
     JScrollPane messageCenterScroll = new JScrollPane(messageCenter);
     JPanel dictionaryPanel = new JPanel(new BorderLayout());
     JButton refreshBtn = new JButton("Refresh Dictionary");
@@ -158,12 +158,13 @@ public class DictionaryServer {
     }
 
     private void setComponentsStyle() {
+//        messageCenter.setContentType("text/html");
         messageCenter.setContentType("text/html");
         wordList.setPreferredSize(new Dimension(600, 200));
     }
 
     private void addComponentsToContainer() {
-        frame.add(new JLabel("Message Center"), BorderLayout.NORTH);
+        frame.add(new JLabel("Log Center"), BorderLayout.NORTH);
 
         frame.add(messageCenterScroll, BorderLayout.CENTER);
 
