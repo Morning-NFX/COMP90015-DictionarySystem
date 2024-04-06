@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class DictionaryServer {
 
     JFrame frame = new JFrame("Server");
-    JTextArea messageCenter = new JTextArea();
+    JTextPane messageCenter = new JTextPane();
     JScrollPane messageCenterScroll = new JScrollPane(messageCenter);
     JPanel dictionaryPanel = new JPanel(new BorderLayout());
     JButton refreshBtn = new JButton("Refresh Dictionary");
@@ -90,7 +90,7 @@ public class DictionaryServer {
             String socketInfo = socket.getInetAddress() + ":" + socket.getPort();
 
             // new connection
-            updateMessageCenter(now.format(formatter) + " New connection from: " + socketInfo);
+            updateMessageCenter("<html><b><font color='green'>" + now.format(formatter) + " New connection from: " + socketInfo + " </font></b>");
 
             // handle each client connection in a separate thread
             new Thread(() -> {
@@ -109,13 +109,13 @@ public class DictionaryServer {
                         out.println(responseObj.toJSONString());
                     }
                 } catch (Exception e) {
-                    updateMessageCenter(now.format(formatter) + " Client at " + socket.getInetAddress() + ":" + socket.getPort() + " has disconnected.");
+                    updateMessageCenter("<html><b><font color='orange'>" + now.format(formatter) + " Client at " + socket.getInetAddress() + ":" + socket.getPort() + " has disconnected </font></b>");
                 } finally {
                     // close socket
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        updateMessageCenter(now.format(formatter) + " Error while closing connection with Client at " + socket.getInetAddress() + ":" + socket.getPort());
+                        updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Error while closing connection with Client at " + socket.getInetAddress() + ":" + socket.getPort() + " </font></b>");
                     }
                 }
             }).start();
@@ -158,6 +158,7 @@ public class DictionaryServer {
     }
 
     private void setComponentsStyle() {
+        messageCenter.setContentType("text/html");
         wordList.setPreferredSize(new Dimension(600, 200));
     }
 
@@ -272,7 +273,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
+            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
@@ -312,7 +313,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
+            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
@@ -361,12 +362,14 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
+            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
 
     private void updateMessageCenter(String message) {
-        messageCenter.setText(message + "\n" + messageCenter.getText());
+        String previousMessages = messageCenter.getText();
+        message = message + "<br>" + previousMessages;
+        messageCenter.setText(message);
     }
 }
