@@ -1,4 +1,5 @@
-package dictsystem.client;
+// Xinyu Wang 1460767
+package com.dictionary.client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,8 +11,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class DictionaryClient {
-    // GUI Components
-
     JFrame frame = new JFrame("Client");
 
     Panel searchPanel = new Panel();

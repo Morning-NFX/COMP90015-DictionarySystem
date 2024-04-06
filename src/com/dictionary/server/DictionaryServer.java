@@ -1,4 +1,5 @@
-package dictsystem.server;
+// Xinyu Wang 1460767
+package com.dictionary.server;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,8 +13,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
-
-import static java.lang.Thread.sleep;
 
 public class DictionaryServer {
 
@@ -273,6 +272,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
+            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
             return responseObj;
         }
     }
@@ -312,6 +312,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
+            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
             return responseObj;
         }
     }
@@ -360,6 +361,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
+            JOptionPane.showMessageDialog(frame, "Database connection error!", "Warning", JOptionPane.WARNING_MESSAGE);
             return responseObj;
         }
     }
