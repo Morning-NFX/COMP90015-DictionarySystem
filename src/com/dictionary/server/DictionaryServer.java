@@ -28,7 +28,6 @@ public class DictionaryServer {
     private ServerSocket serverSocket;
     private Connection dbConnection;
     private HashMap<String, String> dictionary = new HashMap<>();
-    LocalDateTime now = LocalDateTime.now();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("(yyyyMMdd-HH:mm:ss)");
 
     public static void main(String[] args) {
@@ -90,7 +89,7 @@ public class DictionaryServer {
             String socketInfo = socket.getInetAddress() + ":" + socket.getPort();
 
             // new connection
-            updateMessageCenter("<html><b><font color='green'>" + now.format(formatter) + " New connection from: " + socketInfo + " </font></b>");
+            updateMessageCenter("<html><b><font color='green'>" + LocalDateTime.now().format(formatter) + " New connection from: " + socketInfo + " </font></b>");
 
             // handle each client connection in a separate thread
             new Thread(() -> {
@@ -109,13 +108,13 @@ public class DictionaryServer {
                         out.println(responseObj.toJSONString());
                     }
                 } catch (Exception e) {
-                    updateMessageCenter("<html><b><font color='orange'>" + now.format(formatter) + " Client at " + socket.getInetAddress() + ":" + socket.getPort() + " has disconnected </font></b>");
+                    updateMessageCenter("<html><b><font color='orange'>" + LocalDateTime.now().format(formatter) + " Client at " + socket.getInetAddress() + ":" + socket.getPort() + " has disconnected </font></b>");
                 } finally {
                     // close socket
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Error while closing connection with Client at " + socket.getInetAddress() + ":" + socket.getPort() + " </font></b>");
+                        updateMessageCenter("<html><b><font color='red'>" + LocalDateTime.now().format(formatter) + " Error while closing connection with Client at " + socket.getInetAddress() + ":" + socket.getPort() + " </font></b>");
                     }
                 }
             }).start();
@@ -186,22 +185,22 @@ public class DictionaryServer {
 
         // search for word
         if (mode.equals("search")) {
-            updateMessageCenter(now.format(formatter) + " " + socketInfo + " - Search word: " + word);
+            updateMessageCenter(LocalDateTime.now().format(formatter) + " " + socketInfo + " - Search word: " + word);
             return searchWord(word);
         }
         // use lock for data manipulation operations
         synchronized (DictionaryServer.class) {
             // add new word
             if (mode.equals("add")) {;
-                updateMessageCenter(now.format(formatter) + " " + socketInfo + " - Add word: " + word + " with meaning: " + meaning);
+                updateMessageCenter(LocalDateTime.now().format(formatter) + " " + socketInfo + " - Add word: " + word + " with meaning: " + meaning);
                 return addWord(word, meaning);
             }   //  remove an existing word
             else if (mode.equals("remove")) {
-                updateMessageCenter(now.format(formatter) + " " + socketInfo + " - Remove word: " + word);
+                updateMessageCenter(LocalDateTime.now().format(formatter) + " " + socketInfo + " - Remove word: " + word);
                 return removeWord(word);
             }   // update an existing word
             else if (mode.equals("update")) {
-                updateMessageCenter(now.format(formatter) + " " + socketInfo + " - Update word: " + word + " with meaning: " + meaning );
+                updateMessageCenter(LocalDateTime.now().format(formatter) + " " + socketInfo + " - Update word: " + word + " with meaning: " + meaning );
                 return updateWord(word, meaning);
             }
         }
@@ -274,7 +273,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
+            updateMessageCenter("<html><b><font color='red'>" + LocalDateTime.now().format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
@@ -314,7 +313,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
+            updateMessageCenter("<html><b><font color='red'>" + LocalDateTime.now().format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
@@ -363,7 +362,7 @@ public class DictionaryServer {
             // database error
             responseObj.put("status", "error");
             responseObj.put("message", "Database error!");
-            updateMessageCenter("<html><b><font color='red'>" + now.format(formatter) + " Database connection error! </font></b>");
+            updateMessageCenter("<html><b><font color='red'>" + LocalDateTime.now().format(formatter) + " Database connection error! </font></b>");
             return responseObj;
         }
     }
